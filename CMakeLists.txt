@@ -1,4 +1,11 @@
 cmake_minimum_required(VERSION 2.8.5)
+# hunter initialize 
+include ("CMake/HunterGate.cmake")
+HunterGate(
+    URL "https://github.com/CHChang810716/hunter/archive/b39327d8f06179fe46fc85486d2fadaabc135049.zip"
+    SHA1 "9e638babee0e212e4999e758e102221a63c59cfd"
+)
+# hunter initialize done
 project(mlpack C CXX)
 
 # First, define all the compilation options.
@@ -185,8 +192,8 @@ endif()
 #   BOOST_INCLUDEDIR - include directory for Boost
 #   BOOST_LIBRARYDIR - library directory for Boost
 #   MATHJAX_ROOT - root of MathJax installation
-
-find_package(Armadillo 4.200.0 REQUIRED)
+hunter_add_package( Armadillo )
+find_package(Armadillo CONFIG REQUIRED)
 
 # If Armadillo was compiled without ARMA_64BIT_WORD and we are on a 64-bit
 # system (where size_t will be 64 bits), suggest to the user that they should
@@ -195,7 +202,9 @@ find_package(Armadillo 4.200.0 REQUIRED)
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
   # Check the version, to see if ARMA_64BIT_WORD is enabled by default.
   set(ARMA_HAS_64BIT_WORD 0)
-  if(NOT (${ARMADILLO_VERSION_MAJOR} LESS 5))
+  if( NOT DEFINED ARMADILLO_VERSION_MAJOR ) # mordern armadillo package has no version tag provided in config file
+    set(ARMA_HAS_64BIT_WORD 1)
+  elseif(NOT (${ARMADILLO_VERSION_MAJOR} LESS 5))
     set(ARMA_HAS_64BIT_WORD 1)
   else()
     # Can we open the configuration file?  If not, issue a warning.
@@ -236,6 +245,7 @@ endif()
 # and find LAPACK and BLAS ourselves, using a slightly modified variant of the
 # script Armadillo uses to find these.
 if (WIN32)
+  hunter_add_package( LAPACK )
   find_library(LAPACK_LIBRARY
       NAMES lapack liblapack lapack_win32_MT lapack_win32
       PATHS "C:/Program Files/Armadillo"
@@ -244,7 +254,8 @@ if (WIN32)
   if (NOT LAPACK_LIBRARY)
     message(FATAL_ERROR "Cannot find LAPACK library (.lib)!")
   endif ()
-
+  
+  hunter_add_package( OpenBLAS )
   find_library(BLAS_LIBRARY
       NAMES blas libblas blas_win32_MT blas_win32
       PATHS "C:/Program Files/Armadillo"
@@ -266,8 +277,26 @@ set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
 # Unfortunately this configuration variable is necessary and will need to be
 # updated as time goes on and new versions are released.
 set(Boost_ADDITIONAL_VERSIONS
-  "1.49.0" "1.50.0" "1.51.0" "1.52.0" "1.53.0" "1.54.0" "1.55.0")
-find_package(Boost 1.49
+  "1.65.1" "1.65.0" "1.65"
+  "1.64.1" "1.64.0" "1.64"
+  "1.63.1" "1.63.0" "1.63"
+  "1.62.1" "1.62.0" "1.62"
+  "1.61.1" "1.61.0" "1.61"
+  "1.60.1" "1.60.0" "1.60"
+  "1.59.1" "1.59.0" "1.59"
+  "1.58.1" "1.58.0" "1.58"
+  "1.57.1" "1.57.0" "1.57"
+  "1.56.1" "1.56.0" "1.56"
+  "1.55.1" "1.55.0" "1.55"
+  "1.54.1" "1.54.0" "1.54"
+  "1.53.1" "1.53.0" "1.53"
+  "1.52.1" "1.52.0" "1.52"
+  "1.51.1" "1.51.0" "1.51"
+  "1.50.1" "1.50.0" "1.50"
+  "1.49.1" "1.49.0" "1.49")
+hunter_add_package( Boost COMPONENTS program_options serialization test )
+find_package(Boost
+    CONFIG
     COMPONENTS
       program_options
       unit_test_framework
@@ -570,3 +599,50 @@ if (PKG_CONFIG_FOUND)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/lib/pkgconfig/mlpack.pc
       DESTINATION lib/pkgconfig/)
 endif ()
+
+#add config installation location parameters before includeing subdirectories
+# Layout. This works for all platforms:
+#   * <prefix>/lib/cmake/<PROJECT-NAME>
+#   * <prefix>/lib/
+#   * <prefix>/include/
+set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+set(include_install_dir "include")
+set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+
+# Configuration
+set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+set(targets_export_name "${PROJECT_NAME}Targets")
+set(namespace "${PROJECT_NAME}::")
+
+if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+
+    include(CMakePackageConfigHelpers)
+    write_basic_package_version_file("${version_config}" COMPATIBILITY SameMajorVersion)
+    
+    
+    # Use variables:
+    #   * targets_export_name
+    #   * PROJECT_NAME
+    configure_package_config_file(
+        "CMake/Config.cmake.in"
+        "${project_config}"
+        INSTALL_DESTINATION "${config_install_dir}"
+    )
+    
+    #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
+    #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
+    install(
+        FILES "${project_config}" "${version_config}"
+        DESTINATION "${config_install_dir}"
+    )
+    
+    # Config
+    #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
+    install(
+        EXPORT "${targets_export_name}"
+        NAMESPACE "${namespace}"
+        DESTINATION "${config_install_dir}"
+    )
+
+endif()
