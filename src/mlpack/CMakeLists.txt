@@ -89,6 +89,7 @@ install(DIRECTORY ${CMAKE_BINARY_DIR}/include/mlpack DESTINATION include)
 # Set generated executables to be installed.  Unfortunately they must manually
 # be entered...
 install(TARGETS mlpack
+    #   EXPORT  "${targets_export_name}"
   RUNTIME DESTINATION bin
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib)

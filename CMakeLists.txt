@@ -2,11 +2,15 @@ cmake_minimum_required(VERSION 2.8.5)
 # hunter initialize 
 include ("CMake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/CHChang810716/hunter/archive/b39327d8f06179fe46fc85486d2fadaabc135049.zip"
-    SHA1 "9e638babee0e212e4999e758e102221a63c59cfd"
+    URL "https://github.com/CHChang810716/hunter/archive/aa0dcbc326b4aa59645d7c089016cbf5a3cf94e7.zip"
+    SHA1 "6fb913f9db8056949e2e59ad05d146793ca27e9d"
+    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/config.cmake"
 )
 # hunter initialize done
-project(mlpack C CXX)
+project(mlpack C CXX Fortran)
+include(CheckIncludeFileCXX)
+include(CheckLibraryExists)
+include(FortranCInterface)
 
 # First, define all the compilation options.
 # We default to debugging mode for developers.
@@ -246,28 +250,30 @@ endif()
 # script Armadillo uses to find these.
 if (WIN32)
   hunter_add_package( LAPACK )
-  find_library(LAPACK_LIBRARY
-      NAMES lapack liblapack lapack_win32_MT lapack_win32
-      PATHS "C:/Program Files/Armadillo"
-      PATH_SUFFIXES "examples/lib_win32/")
+  find_package( LAPACK CONFIG REQUIRED )
+  # find_library(LAPACK_LIBRARY
+  #     NAMES lapack liblapack lapack_win32_MT lapack_win32
+  #     PATHS "C:/Program Files/Armadillo"
+  #     PATH_SUFFIXES "examples/lib_win32/")
 
-  if (NOT LAPACK_LIBRARY)
-    message(FATAL_ERROR "Cannot find LAPACK library (.lib)!")
-  endif ()
+  # if (NOT LAPACK_LIBRARY)
+  #   message(FATAL_ERROR "Cannot find LAPACK library (.lib)!")
+  # endif ()
   
   hunter_add_package( OpenBLAS )
-  find_library(BLAS_LIBRARY
-      NAMES blas libblas blas_win32_MT blas_win32
-      PATHS "C:/Program Files/Armadillo"
-      PATH_SUFFIXES "examples/lib_win32/")
+  find_package( OpenBLAS CONFIG REQUIRED ) 
+  # find_library(BLAS_LIBRARY
+  #     NAMES blas libblas blas_win32_MT blas_win32
+  #     PATHS "C:/Program Files/Armadillo"
+  #     PATH_SUFFIXES "examples/lib_win32/")
 
-  if (NOT BLAS_LIBRARY)
-    message(FATAL_ERROR "Cannot find BLAS library (.lib)!")
-  endif ()
+  # if (NOT BLAS_LIBRARY)
+  #   message(FATAL_ERROR "Cannot find BLAS library (.lib)!")
+  # endif ()
 
   # Piggyback LAPACK and BLAS linking into Armadillo link.
   set(ARMADILLO_LIBRARIES
-       ${ARMADILLO_LIBRARIES} ${BLAS_LIBRARY} ${LAPACK_LIBRARY})
+       ${ARMADILLO_LIBRARIES} blas lapack)
 endif ()
 
 # Include directories for the previous dependencies.
@@ -294,14 +300,19 @@ set(Boost_ADDITIONAL_VERSIONS
   "1.51.1" "1.51.0" "1.51"
   "1.50.1" "1.50.0" "1.50"
   "1.49.1" "1.49.0" "1.49")
-hunter_add_package( Boost COMPONENTS program_options serialization test )
+hunter_add_package( Boost 
+    COMPONENTS 
+      program_options
+      test
+      serialization
+)
 find_package(Boost
     CONFIG
+    REQUIRED
     COMPONENTS
       program_options
       unit_test_framework
       serialization
-    REQUIRED
 )
 
 link_directories(${Boost_LIBRARY_DIRS})
@@ -407,6 +418,7 @@ add_custom_target(mlpack_arma_config ALL
 set(MLPACK_SRCS ${MLPACK_SRCS}
     "${CMAKE_CURRENT_SOURCE_DIR}/src/mlpack/core/util/arma_config.hpp")
 
+set(targets_export_name "${PROJECT_NAME}Targets")
 # Recurse into the rest of the project.
 add_subdirectory(src/mlpack)
 
@@ -600,49 +612,49 @@ if (PKG_CONFIG_FOUND)
       DESTINATION lib/pkgconfig/)
 endif ()
 
-#add config installation location parameters before includeing subdirectories
-# Layout. This works for all platforms:
-#   * <prefix>/lib/cmake/<PROJECT-NAME>
-#   * <prefix>/lib/
-#   * <prefix>/include/
-set(config_install_dir "lib/cmake/${PROJECT_NAME}")
-set(include_install_dir "include")
-set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
-
-# Configuration
-set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
-set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
-set(targets_export_name "${PROJECT_NAME}Targets")
-set(namespace "${PROJECT_NAME}::")
-
-if(NOT CMAKE_VERSION VERSION_LESS 3.0)
-
-    include(CMakePackageConfigHelpers)
-    write_basic_package_version_file("${version_config}" COMPATIBILITY SameMajorVersion)
-    
-    
-    # Use variables:
-    #   * targets_export_name
-    #   * PROJECT_NAME
-    configure_package_config_file(
-        "CMake/Config.cmake.in"
-        "${project_config}"
-        INSTALL_DESTINATION "${config_install_dir}"
-    )
-    
-    #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
-    #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
-    install(
-        FILES "${project_config}" "${version_config}"
-        DESTINATION "${config_install_dir}"
-    )
-    
-    # Config
-    #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
-    install(
-        EXPORT "${targets_export_name}"
-        NAMESPACE "${namespace}"
-        DESTINATION "${config_install_dir}"
-    )
-
-endif()
+# set(PROJECT_VERSION "${MLPACK_VERSION_STRING}" )
+# #add config installation location parameters before includeing subdirectories
+# # Layout. This works for all platforms:
+# #   * <prefix>/lib/cmake/<PROJECT-NAME>
+# #   * <prefix>/lib/
+# #   * <prefix>/include/
+# set(config_install_dir "lib/cmake/${PROJECT_NAME}")
+# set(include_install_dir "include")
+# set(generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+# 
+# # Configuration
+# set(version_config "${generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
+# set(project_config "${generated_dir}/${PROJECT_NAME}Config.cmake")
+# set(namespace "${PROJECT_NAME}::")
+# 
+# if(NOT CMAKE_VERSION VERSION_LESS 3.0)
+# 
+#     include(CMakePackageConfigHelpers)
+#     write_basic_package_version_file("${version_config}" COMPATIBILITY SameMajorVersion)
+#     
+#     
+#     # Use variables:
+#     #   * targets_export_name
+#     #   * PROJECT_NAME
+#     configure_package_config_file(
+#         "CMake/Config.cmake.in"
+#         "${project_config}"
+#         INSTALL_DESTINATION "${config_install_dir}"
+#     )
+#     
+#     #   * <prefix>/lib/cmake/Foo/FooConfig.cmake
+#     #   * <prefix>/lib/cmake/Foo/FooConfigVersion.cmake
+#     install(
+#         FILES "${project_config}" "${version_config}"
+#         DESTINATION "${config_install_dir}"
+#     )
+#     
+#     # Config
+#     #   * <prefix>/lib/cmake/Foo/FooTargets.cmake
+#     install(
+#         EXPORT "${targets_export_name}"
+#         NAMESPACE "${namespace}"
+#         DESTINATION "${config_install_dir}"
+#     )
+# 
+# endif()
