@@ -12,6 +12,9 @@ endif()
 
 # If we are using Armadillo 5+, ARMA_64BIT_WORD is implicitly enabled.
 set(ARMA_HAS_64BIT_WORD 0) # This may be unnecessary.
+if( NOT DEFINED ARMADILLO_VERSION_MAJOR )
+    set(ARMADILLO_VERSION_MAJOR 7 ) # FIXME: workaround 
+endif()
 if(NOT (${ARMADILLO_VERSION_MAJOR} LESS 5))
   # ARMA_64BIT_WORD is only set if we are on a 64-bit system.
   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
