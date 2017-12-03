@@ -489,56 +489,58 @@ if (UNIX)
     message(WARNING "txt2man not found; man pages will not be generated.")
   else ()
     # We have the tools.  We can make them.
-    add_custom_target(man ALL
-        ${CMAKE_CURRENT_SOURCE_DIR}/CMake/allexec2man.sh
-            ${CMAKE_CURRENT_SOURCE_DIR}/CMake/exec2man.sh
-            ${CMAKE_BINARY_DIR}/share/man
-        WORKING_DIRECTORY
-          ${CMAKE_BINARY_DIR}/bin
-        DEPENDS
-          mlpack_adaboost
-          mlpack_approx_kfn
-          mlpack_kfn
-          mlpack_knn
-          mlpack_krann
-          mlpack_cf
-          mlpack_dbscan
-          mlpack_decision_stump
-          mlpack_decision_tree
-          mlpack_det
-          mlpack_emst
-          mlpack_fastmks
-          mlpack_gmm_train
-          mlpack_gmm_probability
-          mlpack_gmm_generate
-          mlpack_hmm_generate
-          mlpack_hmm_loglik
-          mlpack_hmm_train
-          mlpack_hmm_viterbi
-          mlpack_hoeffding_tree
-          mlpack_kernel_pca
-          mlpack_kmeans
-          mlpack_lars
-          mlpack_linear_regression
-          mlpack_local_coordinate_coding
-          mlpack_logistic_regression
-          mlpack_lsh
-          mlpack_mean_shift
-          mlpack_nbc
-          mlpack_nca
-          mlpack_nmf
-          mlpack_pca
-          mlpack_perceptron
-          mlpack_radical
-          mlpack_range_search
-          mlpack_softmax_regression
-          mlpack_sparse_coding
-        COMMENT "Generating man pages from built executables."
-    )
+    if( ${BUILD_CLI_EXECUTABLES} )
+        add_custom_target(man ALL
+            ${CMAKE_CURRENT_SOURCE_DIR}/CMake/allexec2man.sh
+                ${CMAKE_CURRENT_SOURCE_DIR}/CMake/exec2man.sh
+                ${CMAKE_BINARY_DIR}/share/man
+            WORKING_DIRECTORY
+              ${CMAKE_BINARY_DIR}/bin
+            DEPENDS
+              mlpack_adaboost
+              mlpack_approx_kfn
+              mlpack_kfn
+              mlpack_knn
+              mlpack_krann
+              mlpack_cf
+              mlpack_dbscan
+              mlpack_decision_stump
+              mlpack_decision_tree
+              mlpack_det
+              mlpack_emst
+              mlpack_fastmks
+              mlpack_gmm_train
+              mlpack_gmm_probability
+              mlpack_gmm_generate
+              mlpack_hmm_generate
+              mlpack_hmm_loglik
+              mlpack_hmm_train
+              mlpack_hmm_viterbi
+              mlpack_hoeffding_tree
+              mlpack_kernel_pca
+              mlpack_kmeans
+              mlpack_lars
+              mlpack_linear_regression
+              mlpack_local_coordinate_coding
+              mlpack_logistic_regression
+              mlpack_lsh
+              mlpack_mean_shift
+              mlpack_nbc
+              mlpack_nca
+              mlpack_nmf
+              mlpack_pca
+              mlpack_perceptron
+              mlpack_radical
+              mlpack_range_search
+              mlpack_softmax_regression
+              mlpack_sparse_coding
+            COMMENT "Generating man pages from built executables."
+        )
 
-    # Set the rules to install the documentation.
-    install(DIRECTORY ${CMAKE_BINARY_DIR}/share/man/
-        DESTINATION share/man/man1/)
+        # Set the rules to install the documentation.
+        install(DIRECTORY ${CMAKE_BINARY_DIR}/share/man/
+            DESTINATION share/man/man1/)
+    endif()
   endif ()
 endif ()
 
