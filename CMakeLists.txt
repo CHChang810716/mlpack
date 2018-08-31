@@ -1,10 +1,10 @@
-cmake_minimum_required(VERSION 2.8.5)
+cmake_minimum_required(VERSION 3.10.0)
 # hunter initialize 
 include ("CMake/HunterGate.cmake")
 HunterGate(
-    URL "https://github.com/CHChang810716/hunter/archive/aa0dcbc326b4aa59645d7c089016cbf5a3cf94e7.zip"
-    SHA1 "6fb913f9db8056949e2e59ad05d146793ca27e9d"
-    FILEPATH "${CMAKE_CURRENT_LIST_DIR}/config.cmake"
+    URL "https://github.com/CHChang810716/hunter/archive/2fa8f511d1f158800954ca2f44fff19661cef720.zip"
+    SHA1 "4e47ef10e4df58df2d01215d8bba71ddb5f94b7e"
+#     FILEPATH "${CMAKE_CURRENT_LIST_DIR}/config.cmake"
 )
 # hunter initialize done
 project(mlpack C CXX Fortran)
@@ -22,7 +22,7 @@ option(TEST_VERBOSE "Run test cases with verbose output." OFF)
 option(BUILD_TESTS "Build tests." ON)
 option(BUILD_CLI_EXECUTABLES "Build command-line executables." ON)
 option(BUILD_SHARED_LIBS
-    "Compile shared libraries (if OFF, static libraries are compiled)." ON)
+    "Compile shared libraries (if OFF, static libraries are compiled)." OFF)
 option(BUILD_WITH_COVERAGE
     "Build with support for code coverage tools (gcc only)." OFF)
 option(MATHJAX
@@ -165,8 +165,8 @@ if(DEBUG)
 else()
   add_definitions(-DARMA_NO_DEBUG)
   add_definitions(-DNDEBUG)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O3")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wa,-mbig-obj")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O3 -Wa,-mbig-obj")
 endif()
 
 # Profiling CFLAGS.  Turn profiling information on.
@@ -196,8 +196,8 @@ endif()
 #   BOOST_INCLUDEDIR - include directory for Boost
 #   BOOST_LIBRARYDIR - library directory for Boost
 #   MATHJAX_ROOT - root of MathJax installation
-hunter_add_package( Armadillo )
-find_package(Armadillo CONFIG REQUIRED)
+hunter_add_package( armadillo )
+find_package(armadillo CONFIG REQUIRED)
 
 # If Armadillo was compiled without ARMA_64BIT_WORD and we are on a 64-bit
 # system (where size_t will be 64 bits), suggest to the user that they should
@@ -278,7 +278,7 @@ endif ()
 
 # Include directories for the previous dependencies.
 set(MLPACK_INCLUDE_DIRS ${MLPACK_INCLUDE_DIRS} ${ARMADILLO_INCLUDE_DIRS})
-set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} ${ARMADILLO_LIBRARIES})
+set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} armadillo::armadillo)
 
 # Unfortunately this configuration variable is necessary and will need to be
 # updated as time goes on and new versions are released.
@@ -326,13 +326,13 @@ if (MSVC)
 endif ()
 
 set(MLPACK_INCLUDE_DIRS ${MLPACK_INCLUDE_DIRS} ${Boost_INCLUDE_DIRS})
-set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} ${Boost_LIBRARIES})
+set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} Boost::program_options Boost::serialization)
 set(MLPACK_LIBRARY_DIRS ${MLPACK_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 
 # For Boost testing framework (will have no effect on non-testing executables).
 # This specifies to Boost that we are dynamically linking to the Boost test
 # library.
-add_definitions(-DBOOST_TEST_DYN_LINK)
+# add_definitions(-DBOOST_TEST_DYN_LINK)
 
 # Detect OpenMP support in a compiler. If the compiler supports OpenMP, flags
 # to compile with OpenMP are returned and added and the HAS_OPENMP definition is
@@ -538,6 +538,7 @@ if (UNIX)
   endif ()
 endif ()
 
+set(MLPACK_VERSION_STRING "2.2.5")
 # Create the pkg-config file, if we have pkg-config.
 find_package(PkgConfig)
 if (PKG_CONFIG_FOUND)
@@ -599,7 +600,6 @@ if (PKG_CONFIG_FOUND)
   string(REPLACE ";" " " MLPACK_LIBRARIES_STRING "${MLPACK_LIBRARIES_LIST}")
 
   # Do first stage of configuration.
-  set(MLPACK_VERSION_STRING "@MLPACK_VERSION_STRING@")
   configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/CMake/mlpack.pc.in
     ${CMAKE_BINARY_DIR}/CMake/mlpack.pc.in.partial @ONLY)
@@ -616,6 +616,7 @@ if (PKG_CONFIG_FOUND)
 endif ()
 
 set(PROJECT_VERSION "${MLPACK_VERSION_STRING}" )
+message(STATUS "PROJECT_VERSION: ${PROJECT_VERSION}")
 #add config installation location parameters before includeing subdirectories
 # Layout. This works for all platforms:
 #   * <prefix>/lib/cmake/<PROJECT-NAME>

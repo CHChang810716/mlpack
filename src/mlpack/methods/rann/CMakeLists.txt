@@ -39,8 +39,9 @@ add_cli_executable(krann)
 
 if (BUILD_CLI_EXECUTABLES)
   # Compatibility: retain mlpack_allkrann until mlpack 3.0.0.
-  get_property(krann_loc TARGET mlpack_krann PROPERTY LOCATION)
-  get_filename_component(krann_ext ${krann_loc} EXT)
+  # get_property(krann_loc TARGET mlpack_krann PROPERTY LOCATION)
+  # get_filename_component(krann_ext ${krann_loc} EXT)
+  set(krann_ext ${CMAKE_EXECUTABLE_SUFFIX})
 
   add_custom_command(TARGET mlpack_krann POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy
@@ -48,7 +49,7 @@ if (BUILD_CLI_EXECUTABLES)
       $<TARGET_FILE_DIR:mlpack_krann>/mlpack_allkrann${krann_ext}
   )
 
-  install(PROGRAMS $<TARGET_FILE_DIR:mlpack_kfn>/mlpack_allkrann${krann_ext}
+  install(PROGRAMS $<TARGET_FILE_DIR:mlpack_krann>/mlpack_allkrann${krann_ext}
       DESTINATION bin)
 endif ()
 

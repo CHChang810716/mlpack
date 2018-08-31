@@ -91,9 +91,9 @@ add_executable(mlpack_test
   timer_test.cpp
 )
 # Link dependencies of test executable.
-target_link_libraries(mlpack_test
+target_link_libraries(mlpack_test PRIVATE
   mlpack
-  ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+  Boost::unit_test_framework
 )
 
 # Copy test data into right place.

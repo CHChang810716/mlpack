@@ -41,7 +41,7 @@ if (NOT BUILD_SHARED_LIBS)
   add_definitions(-DMLPACK_STATIC_DEFINE)
 endif ()
 
-target_link_libraries(mlpack
+target_link_libraries(mlpack PUBLIC
   ${MLPACK_LIBRARIES})
 
 set_target_properties(mlpack
