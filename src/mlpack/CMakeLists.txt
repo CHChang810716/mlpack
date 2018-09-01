@@ -38,12 +38,14 @@ set_target_properties(mlpack PROPERTIES WINDOWS_EXPORT_ALL_SYMBOLS ON)
 include(GenerateExportHeader)
 generate_export_header(mlpack EXPORT_FILE_NAME mlpack_export.hpp)
 if (NOT BUILD_SHARED_LIBS)
-  add_definitions(-DMLPACK_STATIC_DEFINE)
+  list(APPEND MLPACK_DEFS MLPACK_STATIC_DEFINE)
+  # add_definitions(-DMLPACK_STATIC_DEFINE)
 endif ()
 
 target_link_libraries(mlpack PUBLIC
   ${MLPACK_LIBRARIES})
-
+target_compile_options(mlpack PUBLIC ${MLPACK_CXX_FLAGS} ${MLPACK_CFLAGS})
+target_compile_definitions(mlpack PUBLIC ${MLPACK_DEFS})
 set_target_properties(mlpack
   PROPERTIES
   VERSION 2.2

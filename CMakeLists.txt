@@ -60,8 +60,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/CMake")
 # Only GCC-like compilers support -Wextra, and other compilers give tons of
 # output for -Wall, so only -Wall and -Wextra on GCC.
 if(CMAKE_COMPILER_IS_GNUCC OR "${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -ftemplate-depth=1000")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+  set(MLPACK_CXX_FLAGS -ftemplate-depth=1000)
 endif()
 
 # These support libraries are used if we need to link against something
@@ -157,16 +158,16 @@ if(DEBUG)
           ${LIBDL_INCLUDE_DIRS})
       set(MLPACK_LIBRARIES ${MLPACK_LIBRARIES} ${LIBBFD_LIBRARIES}
           ${LIBDL_LIBRARIES})
-      add_definitions(-DHAS_BFD_DL)
+      list(APPEND MLPACK_DEFS HAS_BFD_DL)
     else()
       message(WARNING "No libBFD and/or libDL has been found!")
     endif()
   endif()
 else()
-  add_definitions(-DARMA_NO_DEBUG)
+  list(APPEND MLPACK_DEFS ARMA_NO_DEBUG)
   add_definitions(-DNDEBUG)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -Wa,-mbig-obj")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O3 -Wa,-mbig-obj")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=c99 -O3")
 endif()
 
 # Profiling CFLAGS.  Turn profiling information on.
@@ -239,7 +240,7 @@ else()
   # to be 32 bits, since otherwise Armadillo will produce a warning that it is
   # disabling 64-bit support.
   if (CMAKE_SIZEOF_VOID_P EQUAL 4)
-    add_definitions(-DARMA_32BIT_WORD)
+    list(APPEND MLPACK_DEFS ARMA_32BIT_WORD)
   endif ()
 endif()
 
@@ -346,9 +347,10 @@ set(MLPACK_LIBRARY_DIRS ${MLPACK_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 # #endif
 find_package(OpenMP)
 if (OPENMP_FOUND)
-  add_definitions(-DHAS_OPENMP)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  # add_definitions(-DHAS_OPENMP)
+  set(MLPACK_DEFS HAS_OPENMP)
+  set(MLPACK_C_FLAGS ${MLPACK_C_FLAGS} ${OpenMP_C_FLAGS})
+  set(MLPACK_CXX_FLAGS ${MLPACK_CXX_FLAGS} ${OpenMP_CXX_FLAGS})
 else ()
   # Disable warnings for all the unknown OpenMP pragmas.
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-unknown-pragmas")
@@ -358,7 +360,8 @@ endif ()
 # some reason.
 include(CMake/TargetDistclean.cmake OPTIONAL)
 
-include_directories(${CMAKE_SOURCE_DIR})
+# include_directories(${CMAKE_SOURCE_DIR})
+message(STATUS "MLPACK_INCLUDE_DIRS: ${MLPACK_INCLUDE_DIRS}")
 include_directories(${MLPACK_INCLUDE_DIRS})
 
 # On Windows, things end up under Debug/ or Release/.
