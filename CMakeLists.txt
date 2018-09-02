@@ -201,9 +201,9 @@ endif()
 #   BOOST_INCLUDEDIR - include directory for Boost
 #   BOOST_LIBRARYDIR - library directory for Boost
 #   MATHJAX_ROOT - root of MathJax installation
-hunter_add_package( Armadillo )
+hunter_add_package( armadillo )
 # find_package(Armadillo 6.500.0 CONFIG REQUIRED)
-find_package(Armadillo CONFIG REQUIRED)
+find_package(armadillo CONFIG REQUIRED)
 
 # If Armadillo was compiled without ARMA_64BIT_WORD and we are on a 64-bit
 # system (where size_t will be 64 bits), suggest to the user that they should
