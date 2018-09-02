@@ -1,5 +1,3 @@
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/..) # mlpack/mlpack_export.hpp
-
 # Add core.hpp to list of sources.
 set(MLPACK_SRCS ${MLPACK_SRCS} "${CMAKE_CURRENT_SOURCE_DIR}/core.hpp")
 
@@ -41,6 +39,10 @@ if (NOT BUILD_SHARED_LIBS)
   add_definitions(-DMLPACK_STATIC_DEFINE)
 endif ()
 
+target_include_directories(mlpack PUBLIC 
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/..> # mlpack/mlpack_export.hpp
+    $<INSTALL_INTERFACE:include>
+)
 target_link_libraries(mlpack
   ${MLPACK_LIBRARIES})
 
