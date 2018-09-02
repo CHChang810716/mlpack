@@ -1,8 +1,8 @@
 @PACKAGE_INIT@
 
 if( NOT @BUILD_SHARED_LIBS@ )
-    find_package(Armadillo CONFIG REQUIRED)
-    find_package(Boost 1.49
+    find_package(armadillo CONFIG REQUIRED)
+    find_package(Boost
         CONFIG
         REQUIRED
         COMPONENTS
