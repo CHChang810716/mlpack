@@ -30,6 +30,7 @@ option(MATHJAX
 option(FORCE_CXX11
     "Don't check that the compiler supports C++11, just assume it.  Make sure to specify any necessary flag to enable C++11 as part of CXXFLAGS."
     OFF)
+option(USE_OPENMP "If available, use OpenMP for parallelization." ON)
 enable_testing()
 
 # Ensure that we have a C++11 compiler.  In newer versions of CMake, this is
@@ -345,7 +346,10 @@ set(MLPACK_LIBRARY_DIRS ${MLPACK_LIBRARY_DIRS} ${Boost_LIBRARY_DIRS})
 #   ... openMP code here ...
 # }
 # #endif
-find_package(OpenMP)
+if(USE_OPENMP)
+    find_package(OpenMP)
+endif()
+
 if (OPENMP_FOUND)
   # add_definitions(-DHAS_OPENMP)
   set(MLPACK_DEFS HAS_OPENMP)
