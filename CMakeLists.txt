@@ -19,8 +19,8 @@ option(PROFILE "Compile with profiling information." OFF)
 option(ARMA_EXTRA_DEBUG "Compile with extra Armadillo debugging symbols." OFF)
 option(MATLAB_BINDINGS "Compile MATLAB bindings if MATLAB is found." OFF)
 option(TEST_VERBOSE "Run test cases with verbose output." OFF)
-option(BUILD_TESTS "Build tests." ON)
-option(BUILD_CLI_EXECUTABLES "Build command-line executables." ON)
+option(BUILD_TESTS "Build tests." OFF)
+option(BUILD_CLI_EXECUTABLES "Build command-line executables." OFF)
 option(BUILD_SHARED_LIBS
     "Compile shared libraries (if OFF, static libraries are compiled)." OFF)
 option(BUILD_WITH_COVERAGE
@@ -30,7 +30,7 @@ option(MATHJAX
 option(FORCE_CXX11
     "Don't check that the compiler supports C++11, just assume it.  Make sure to specify any necessary flag to enable C++11 as part of CXXFLAGS."
     OFF)
-option(USE_OPENMP "If available, use OpenMP for parallelization." ON)
+option(USE_OPENMP "If available, use OpenMP for parallelization." OFF)
 enable_testing()
 
 # Ensure that we have a C++11 compiler.  In newer versions of CMake, this is
